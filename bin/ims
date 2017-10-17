@@ -4,12 +4,19 @@ import os
 import sys
 import urllib2
 import json
+import colorful
+
+def print_error(msg):
+    print colorful.red(msg)
+    exit()
+
+def print_success(msg):
+    print colorful.green(msg)
 
 def test_system():
     """Runs few tests to check if npm and peerflix is installed on the system."""
     if os.system('npm --version') != 0:
-        print 'NPM not installed installed, please read the Readme file for more information.'
-        exit()
+        print_error('NPM not installed installed, please read the Readme file for more information.')
     if os.system('peerflix --version') != 0:
         print 'Peerflix not installed, installing..'
         os.system('npm install -g peerflix')
@@ -51,9 +58,7 @@ def get_yts_movie_options(url):
             moviesList.append(movie)
         return moviesList
     else:
-        print "Something went wrong"
-        print j['status']
-        exit()
+        print_error("Something went wrong: " + j['status'])
 
 def get_magnets(movie):
     '''Get magnet information from the chosen movie'''
@@ -81,8 +86,7 @@ def get_yts_magnet(movie_name = 'Saw'):
 
     movies = get_yts_movie_options(URL)
     if len(movies) == 0:
-        print "Could not find any movies"
-        exit()
+        print_error("Could not find any movies")
     elif len(movies) == 1:
         return get_magnets(movies[0])
     else:
@@ -94,6 +98,7 @@ def main():
     print "--- Checking System ---"
     test_system()
     movie = get_input()
+    print_success("All Good!")
     print "--- Getting Movie Options ---"
     try:
         command = 'peerflix "' + get_yts_magnet(movie) + '" --vlc'
