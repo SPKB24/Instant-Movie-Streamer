@@ -2,14 +2,8 @@
 
 import os
 import sys
-
 import urllib2
 import json
-
-import requests
-from bs4 import BeautifulSoup
-
-DEBUG = True
 
 def test_system():
     """Runs few tests to check if npm and peerflix is installed on the system."""
@@ -32,7 +26,7 @@ def get_input():
     return query
 
 def get_yts_movie_options(url):
-
+    '''Make HTTP request to YTS api and retrieve a list of movies'''
     hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
        'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
@@ -45,6 +39,7 @@ def get_yts_movie_options(url):
     except urllib2.HTTPError, e:
         print e.fp.read()
 
+    # Parse the JSON
     j = json.load(page)
     if j['status'] == 'ok':
         movies = j['data']['movies']
@@ -61,6 +56,7 @@ def get_yts_movie_options(url):
         exit()
 
 def get_magnets(movie):
+    '''Get magnet information from the chosen movie'''
     first="magnet:?xt=urn:btih:"
     second="&dn="
     third=["udp://open.demonii.com:1337/announce","udp://tracker.openbittorrent.com:80","udp://tracker.coppersurfer.tk:6969","udp://glotorrents.pw:6969/announce"]
@@ -68,6 +64,7 @@ def get_magnets(movie):
     torrent_options = movie["torrents"]
     magnet_hash = ""
     for option in torrent_options:
+        # Try to get 1080p, otherwise get 720p
         if option["quality"] == "1080p":
             magnet_hash = option["hash"]
             break
@@ -83,25 +80,15 @@ def get_yts_magnet(movie_name = 'Saw'):
     URL = 'https://yts.ag/api/v2/list_movies.json?quality=1080p&limit=10&query_term='+movie_name.replace(' ', '+')
 
     movies = get_yts_movie_options(URL)
-    if len(movies) == 1:
+    if len(movies) == 0:
+        print "Could not find any movies"
+        exit()
+    elif len(movies) == 1:
         return get_magnets(movies[0])
     else:
         sys.stdout.write("Choose the number of the movie that you want to stream: ")
         choice = int(sys.stdin.read(1))
         return get_magnets(movies[int(choice) - 1])
-
-def get_magnet_link(movie_name = 'harry potter'):
-
-    URL = 'https://www.skytorrents.in/search/all/ed/1/?q='+movie_name.replace(' ', '+')
-
-    resp = requests.get(URL)
-    soup = BeautifulSoup(resp.text, 'html.parser')
-
-    movie_page = soup.find_all("a")
-
-    for each in movie_page:
-        if 'magnet:' in each.get('href'):
-            return each.get('href')
 
 def main():
     print "--- Checking System ---"
