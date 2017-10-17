@@ -6,8 +6,7 @@ import sys
 import requests
 from bs4 import BeautifulSoup
 
-DEBUG = False
-
+DEBUG = True
 
 def test_system():
     """Runs few tests to check if npm and peerflix is installed on the system."""
@@ -17,7 +16,6 @@ def test_system():
     if os.system('peerflix --version') != 0:
         print 'Peerflix not installed, installing..'
         os.system('npm install -g peerflix')
-
 
 def get_input():
     """Gets the input from user and formats it."""
@@ -29,6 +27,17 @@ def get_input():
         print e
         exit()
     return query
+
+def get_yts_magnet(movie_name = 'Saw'):
+    URL = 'https://yts.ag/api/v2/list_movies.json?quality=1080p&limit=10&search_term='+movie_name.replace(' ', '+')
+
+    resp = requests.get(URL)
+    soup = BeautifulSoup(resp.text, 'html.parser')
+
+    movie_page = soup.find_all("a")
+
+    for each in movie_page:
+        print each
 
 def get_magnet_link(movie_name = 'harry potter'):
 
@@ -48,8 +57,9 @@ def main():
     movie = get_input()
     try:
         print ('Streaming Torrent')
-        command = 'peerflix "'+get_magnet_link(movie)+'" --vlc'
-        os.system(command)
+        get_yts_magnet(movie)
+        #command = 'peerflix "'+get_yts_magnet(movie)+'" --vlc'
+        #os.system(command)
     except Exception as e:
         print e
         exit()
