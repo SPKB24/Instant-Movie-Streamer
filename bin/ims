@@ -49,14 +49,19 @@ def get_yts_movie_options(url):
     # Parse the JSON
     j = json.load(page)
     if j['status'] == 'ok':
-        movies = j['data']['movies']
-        moviesList = []
-        i=0
-        for movie in movies:
-            i += 1
-            print str(i) + ". " + movie['title']
-            moviesList.append(movie)
-        return moviesList
+        numMovies = j['data']['movie_count']
+
+        if numMovies > 0:
+            movies = j['data']['movies']
+            moviesList = []
+            i=0
+            for movie in movies:
+                i += 1
+                print str(i) + ". " + movie['title']
+                moviesList.append(movie)
+            return moviesList
+        else:
+            print_error("Could not find any matching movies")
     else:
         print_error("Something went wrong: " + j['status'])
 
@@ -85,6 +90,7 @@ def get_yts_magnet(movie_name = 'Saw'):
     URL = 'https://yts.ag/api/v2/list_movies.json?quality=1080p&limit=10&query_term='+movie_name.replace(' ', '+')
 
     movies = get_yts_movie_options(URL)
+    print "GOT MOVIES : " + str(movies)
     if len(movies) == 0:
         print_error("Could not find any movies")
     elif len(movies) == 1:
