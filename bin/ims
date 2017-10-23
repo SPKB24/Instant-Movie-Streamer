@@ -90,7 +90,6 @@ def get_yts_magnet(movie_name = 'Saw'):
     URL = 'https://yts.ag/api/v2/list_movies.json?quality=1080p&limit=10&query_term='+movie_name.replace(' ', '+')
 
     movies = get_yts_movie_options(URL)
-    print "GOT MOVIES : " + str(movies)
     if len(movies) == 0:
         print_error("Could not find any movies")
     elif len(movies) == 1:
