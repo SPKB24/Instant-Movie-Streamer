@@ -108,6 +108,9 @@ def main():
     try:
         command = 'peerflix "' + get_yts_magnet(movie) + '" --vlc'
         os.system(command)
+    except KeyboardInterrupt:
+        print "\nExiting..."
+        sys.exit()
     except Exception as e:
         print e
         exit()
